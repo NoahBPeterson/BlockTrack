@@ -1,0 +1,13 @@
+name: BlockTrack
+main: com.nbpe.blocktrack.BlockTrack
+author: nbpe
+version: 1.0.0
+api: ["1.0.0"]
+depend: [DbLib]
+description: BlockTrack for NukkitX
+commands:
+   blocktrack:
+      description: Check the number of blocks placed and broken by a player.
+      usage: "/blockTrack <player> [total broken/placed]/[blockName]"
+      permission: op
+      permission-message: You don't have <permission>
