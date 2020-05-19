@@ -13,6 +13,7 @@ import com.j256.ormlite.table.TableUtils;
 import com.nbpe.blocktrack.BlockTrack;
 
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import ru.nukkit.dblib.DbLib;
 
 public class DBAccess
@@ -66,7 +67,40 @@ public class DBAccess
     	return true;
 	}
     
-	public static void addEntry(UUID player, int blockType)
+	public static void BHaddEntry(UUID player, Block block, boolean placed)
+	{
+		
+		BlockHistory record = new BlockHistory();
+		record.setBlockPosition(DBAccess.getByBlock(block));
+		record.setBlockType(block.getId());
+		record.setPlaced(placed);
+		record.setUUID(player.toString());
+		if(record.getBlockPosition() == null) //Create BlockPosition record if it doesn't exist
+		{
+			BlockPosition bpEntry = new BlockPosition();
+			bpEntry.setWorld(block.level.getName());
+			bpEntry.setX(block.getFloorX());
+			bpEntry.setY(block.getFloorY());
+			bpEntry.setZ(block.getFloorZ());
+			try {
+				blockPosDao.create(bpEntry);
+				record.setBlockPosition(bpEntry); //Now set record's foreign key to the new BlockPosition entry
+			} catch (SQLException e) {
+				BlockTrack.plugin.getLogger().info("Failed to save record! "+e.getSQLState());
+			}
+		}
+		
+		try
+		{
+			blockHisDao.create(record);
+			
+		} catch (SQLException e)
+		{
+			BlockTrack.plugin.getLogger().info("Failed to save record! "+e.getSQLState());
+		}
+	}
+    
+	public static void BTaddEntry(UUID player, int blockType)
 	{
 		BlockTable record = new BlockTable(player.toString(), blockType);
 		try
@@ -79,7 +113,7 @@ public class DBAccess
 		}
 	}
 	
-	public void updateEntry(BlockTable entryUpdate)
+	public void BTupdateEntry(BlockTable entryUpdate)
 	{
 		try {
 			if(entryUpdate.getUUID() == null || entryUpdate.getBlockType() == 0)
@@ -120,6 +154,23 @@ public class DBAccess
         return blocksPlaced;
 	}
 	
+	public static BlockPosition getByBlock(Block block)
+	{
+		BlockPosition record = null;
+		try
+		{
+			QueryBuilder<BlockPosition, BlockPosition> queryBuilder = blockPosDao.queryBuilder();
+			queryBuilder.where().eq("x", block.getFloorX()).and().eq("y", block.getFloorY()).and().eq("z", block.getFloorZ()).and().eq("world", block.level.getName());
+			
+			PreparedQuery<BlockPosition> preparedQuery = queryBuilder.prepare();
+			record = blockPosDao.queryForFirst(preparedQuery);
+		} catch (SQLException e) {
+            e.printStackTrace();
+            return record;
+        }
+        return record;
+	}
+	
 	public static BlockTable getByUUIDandBlockType(UUID player, int BlockType)
 	{
 		BlockTable record = null;
@@ -127,7 +178,6 @@ public class DBAccess
 		{
 			QueryBuilder<BlockTable, BlockTable> queryBuilder = entriesDao.queryBuilder();
 			queryBuilder.where().eq("uuid", player.toString()).and().eq("blockType", BlockType);
-			//queryBuilder.where().and().eq("blockType", BlockType);
 			
 			PreparedQuery<BlockTable> preparedQuery = queryBuilder.prepare();
 			record = entriesDao.queryForFirst(preparedQuery);
@@ -145,6 +195,26 @@ public class DBAccess
         try {
         	// "SELECT * from BlockTable WHERE uuid=player.toString() ORDER BY destroyed DESC";
         	records = entriesDao.queryBuilder().orderBy("destroyed", false).where().eq("uuid", player.toString()).query();
+            //records = entriesDao.queryForEq("uuid", player.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return records;
+        }
+        return records;
+    }
+    
+    public static List<BlockHistory> getListByBlock(Block block)
+    {
+        List<BlockHistory> records = null;
+    	BlockPosition getHistory = getByBlock(block);
+    	if(getHistory == null)
+    	{
+    		return records;
+    	}
+        try {
+        	// "SELECT * from BlockHistory AND BlockPosition WHERE BlockHistory.BlockPosition = BlockPosition
+        	records = blockHisDao.queryBuilder().orderBy("unixTime", false).where().eq("ID_BLOCK_POSITION", getHistory.genID)
+        			.query();
             //records = entriesDao.queryForEq("uuid", player.toString());
         } catch (SQLException e) {
             e.printStackTrace();

@@ -18,7 +18,7 @@ public class BlockHistory {
     @DatabaseField(canBeNull = false, columnName = "placed")
 	boolean placed;
 	
-    @DatabaseField(canBeNull = true, columnName = "blockType")
+    @DatabaseField(canBeNull = false, columnName = "blockType")
 	int blockType;
 	
     BlockHistory(BlockPosition blockPosition, String UUID, boolean placed, int BlockType)
@@ -27,7 +27,8 @@ public class BlockHistory {
     	uuid=UUID;
     	placed=true;
     	blockType=BlockType;
-		unixTime = (int) System.currentTimeMillis()/1000;
+		unixTime = (int) (System.currentTimeMillis() / 1000L);
+
     }
     
     BlockHistory(BlockPosition blockPosition, String UUID)
@@ -35,24 +36,17 @@ public class BlockHistory {
     	blockPos = blockPosition;
     	uuid=UUID;
     	placed=false;
-		unixTime = (int) System.currentTimeMillis()/1000;
+		unixTime = (int) (System.currentTimeMillis() / 1000L);
     }
     
 	BlockHistory()
 	{
-		unixTime = (int) System.currentTimeMillis()/1000;
+		unixTime = (int) (System.currentTimeMillis() / 1000L);
 	}
 	
-	//LocalDateTime triggerTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(getTime()),TimeZone.getDefault().toZoneId());
-	//2017-07-03T10:25
 	public int getTime()
 	{
 		return unixTime;
-	}
-	
-	public void setTime(int time)
-	{
-		unixTime = time;
 	}
 	
 	public BlockPosition getBlockPosition()

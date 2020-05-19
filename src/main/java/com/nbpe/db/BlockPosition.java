@@ -19,7 +19,7 @@ public class BlockPosition {
     @DatabaseField(generatedId = true)
 	int genID;
 	
-	BlockPosition(){}
+	public BlockPosition(){}
 	
 	public void setX(int c)
 	{
