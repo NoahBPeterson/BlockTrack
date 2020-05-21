@@ -73,7 +73,7 @@ public class DBAccess
     	return true;
 	}
     
-    public static BlockPlayer BPgetPlayer(UUID player)
+    public static BlockPlayer getPlayer(UUID player)
     {
     	BlockPlayer record = null;
 		try
@@ -90,7 +90,7 @@ public class DBAccess
         return record;
     }
     
-    public static BlockWorld BWgetWorld(String levelName)
+    public static BlockWorld getWorld(String levelName)
     {
     	BlockWorld record = null;
 		try
@@ -107,10 +107,10 @@ public class DBAccess
         return record;
     }
     
-    public static void BPlayerAddEntry(UUID player)
+    public static void playerAddEntry(UUID player)
     {
     	BlockPlayer record = new BlockPlayer();
-    	if(BPgetPlayer(player)==null && player != null)
+    	if(getPlayer(player)==null && player != null)
     	{
     		try {
     			record.setuuid(player.toString());
@@ -123,10 +123,10 @@ public class DBAccess
     	}
     }
     
-    public static void BWaddEntry(String levelName)
+    public static void worldNameAddEntry(String levelName)
     {
     	BlockWorld record = new BlockWorld();
-    	if(BWgetWorld(levelName)==null)
+    	if(getWorld(levelName)==null)
     	{
     		record.setWorld(levelName);
     		try {
@@ -137,19 +137,19 @@ public class DBAccess
     	}
     }
     
-    public static void BlockPositionAddEntry(Block block)
+    public static void blockPositionAddEntry(Block block)
     {
     	BlockPosition record = new BlockPosition();
     	if(getByBlock(block)==null)
     	{
-    		record.setWorld(BWgetWorld(block.level.getName()));
+    		record.setWorld(getWorld(block.level.getName()));
     		record.setX(block.getFloorX());
     		record.setY(block.getFloorY());
     		record.setZ(block.getFloorZ());
     		if(record.getWorld() == null) //Create BlockWorld record if it doesn't exist
     		{
-    			BWaddEntry(block.level.getName());
-        		record.setWorld(BWgetWorld(block.level.getName()));
+    			worldNameAddEntry(block.level.getName());
+        		record.setWorld(getWorld(block.level.getName()));
     		}
 			try {
 				blockPosDao.create(record);
@@ -159,24 +159,24 @@ public class DBAccess
     	}
     }
     
-	public static void BHaddEntry(UUID player, Block block, boolean placed)
+	public static void blockHistoryAddEntry(UUID player, Block block, boolean placed)
 	{
 		
 		BlockHistory record = new BlockHistory();
 		record.setBlockPosition(getByBlock(block));
 		record.setBlockType(block.getId());
 		record.setPlaced(placed);
-		record.setPlayer(BPgetPlayer(player));
+		record.setPlayer(getPlayer(player));
 		if(record.getBlockPosition() == null) //Create BlockPosition record if it doesn't exist
 		{
-			BlockPositionAddEntry(block);
+			blockPositionAddEntry(block);
 			record.setBlockPosition(getByBlock(block));
 		}
 		
 		if(record.getPlayer() == null) //Create BlockPlayer record if it doesn't exist
 		{
-			BPlayerAddEntry(player);
-			record.setPlayer(BPgetPlayer(player));
+			playerAddEntry(player);
+			record.setPlayer(getPlayer(player));
 		}
 		
 		try
@@ -189,13 +189,13 @@ public class DBAccess
 		}
 	}
     
-	public static void BTaddEntry(UUID player, int blockType)
+	public static void blockTrackAddEntry(UUID player, int blockType)
 	{
-		BlockPlayer bPlayer = DBAccess.BPgetPlayer(player);
+		BlockPlayer bPlayer = DBAccess.getPlayer(player);
 		if(bPlayer == null)
 		{
-			BPlayerAddEntry(player);
-			bPlayer = DBAccess.BPgetPlayer(player);
+			playerAddEntry(player);
+			bPlayer = DBAccess.getPlayer(player);
 		}
 		BlockTable record = new BlockTable(bPlayer, blockType);
 		try
@@ -208,7 +208,7 @@ public class DBAccess
 		}
 	}
 	
-	public void BTupdateEntry(BlockTable entryUpdate)
+	public void blockTrackUpdateEntry(BlockTable entryUpdate)
 	{
 		try {
 			if(entryUpdate.getPlayer() == null || entryUpdate.getBlockType() == 0)
@@ -252,7 +252,7 @@ public class DBAccess
 	public static BlockPosition getByBlock(Block block)
 	{
 		BlockPosition record = null;
-		BlockWorld worldRecord = DBAccess.BWgetWorld(block.level.getName());
+		BlockWorld worldRecord = DBAccess.getWorld(block.level.getName());
 		if(worldRecord == null)
 		{
 			return record;
@@ -274,11 +274,11 @@ public class DBAccess
 	public static BlockTable getByUUIDandBlockType(UUID player, int BlockType)
 	{
 		BlockTable record = null;
-		BlockPlayer recordPlayer = DBAccess.BPgetPlayer(player);
+		BlockPlayer recordPlayer = DBAccess.getPlayer(player);
 		if(recordPlayer == null)
 		{
-			DBAccess.BPlayerAddEntry(player);
-			recordPlayer = DBAccess.BPgetPlayer(player);
+			DBAccess.playerAddEntry(player);
+			recordPlayer = DBAccess.getPlayer(player);
     		try {
 				blockPlayDao.refresh(recordPlayer);
 			} catch (SQLException e) {
@@ -303,7 +303,7 @@ public class DBAccess
     public static List<BlockTable> getByUUID(UUID player)
     {
         List<BlockTable> records = null;
-		BlockPlayer recordPlayer = DBAccess.BPgetPlayer(player);
+		BlockPlayer recordPlayer = DBAccess.getPlayer(player);
 		if(recordPlayer == null)
 		{
 			return records;

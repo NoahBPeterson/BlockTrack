@@ -25,7 +25,7 @@ public class BlockHistory {
     {
     	blockPos = blockPosition;
     	bPlayer=blockPlayer;
-    	setPlaced(placed);
+    	this.placed=placed;
     	blockType=BlockType;
 		unixTime = (int) (System.currentTimeMillis() / 1000L);
 

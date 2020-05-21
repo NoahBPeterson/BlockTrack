@@ -81,7 +81,7 @@ public class BlockTrack extends PluginBase
             return false;
         }
         
-        boolean blockTrack = cmd.getName().toLowerCase().equals("blocktrack");
+        boolean blockTrack = cmd.getName().equalsIgnoreCase("blocktrack");
         Player p = args.length != 0 ? Server.getInstance().getPlayer(args[0]) : null;
         if(p == null && blockTrack)
         {
@@ -116,7 +116,7 @@ public class BlockTrack extends PluginBase
 		        	sender.sendMessage(getUsage());
 		        	return false;
 	        }
-        }else if(cmd.getName().toLowerCase().equals("blockhistory"))
+        }else if(cmd.getName().equalsIgnoreCase("blockhistory"))
         {
         	Player bHPlayer;
         	if(sender instanceof Player) {
@@ -130,7 +130,7 @@ public class BlockTrack extends PluginBase
         return true;
     }
     
-    static void sendStringArray(CommandSender sender, String[] array)
+    public static void sendStringArray(CommandSender sender, String[] array)
     {
     	for(int i = 0; i < array.length; i++)
     	{
@@ -138,14 +138,14 @@ public class BlockTrack extends PluginBase
     	}
     }
     
-    String getUsage()
+    private String getUsage()
     {
     	return ("/blocktrack <player> [blockName]/[broken/placed]");
     }
     
 	//LocalDateTime triggerTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(getTime()),TimeZone.getDefault().toZoneId());
 	//2017-07-03T10:25
-    static String[] blockHistoryFormat(List<BlockHistory> tableToFormat, int page)
+    public static String[] blockHistoryFormat(List<BlockHistory> tableToFormat, int page)
     {
     	int max = (10 < tableToFormat.size()) ? 10 : tableToFormat.size()+1;
     	String[] formatted = new String[max];
@@ -186,7 +186,7 @@ public class BlockTrack extends PluginBase
     	return formatted;
     }
     
-    static String[] dbList(List<BlockTable> tableToFormat, int page)
+    public static String[] dbList(List<BlockTable> tableToFormat, int page)
     {
     	int max = (10 < tableToFormat.size()) ? 10 : tableToFormat.size()+1;
     	String[] formatted = new String[max];

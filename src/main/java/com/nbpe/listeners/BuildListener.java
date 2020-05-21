@@ -13,10 +13,10 @@ import cn.nukkit.event.block.BlockPlaceEvent;
 
 public class BuildListener implements Listener {
 	
-	DBAccess dbAccess;
+	private DBAccess dbAccess;
 
     @EventHandler(priority = EventPriority.HIGH)
-	public void BuildHandler(BlockPlaceEvent e)
+	public void buildHandler(BlockPlaceEvent e)
 	{
 		UUID player = e.getPlayer().getUniqueId();
 		dbAccess = DBAccess.getDB();
@@ -26,7 +26,7 @@ public class BuildListener implements Listener {
 			e.setCancelled();
 			return;
 		} else {
-			DBAccess.BHaddEntry(player, e.getBlock(), true); //BlockHistory Tracker
+			DBAccess.blockHistoryAddEntry(player, e.getBlock(), true); //BlockHistory Tracker
 		}
 
 		int blockType = e.getBlock().getId();
@@ -40,13 +40,13 @@ public class BuildListener implements Listener {
 			placed += entry.getPlaced(); //Get number of {blockType} placed by player, increment
 		}else
 		{
-			DBAccess.BTaddEntry(player, blockType);
+			DBAccess.blockTrackAddEntry(player, blockType);
 			entry = DBAccess.getByUUIDandBlockType(player, blockType);
 			entry.setPlaced(placed);
-			dbAccess.BTupdateEntry(entry);
+			dbAccess.blockTrackUpdateEntry(entry);
 			return;
 		}
 		entry.setPlaced(placed); //Set number of {blockType} placed by player
-		dbAccess.BTupdateEntry(entry);
+		dbAccess.blockTrackUpdateEntry(entry);
 	}
 }

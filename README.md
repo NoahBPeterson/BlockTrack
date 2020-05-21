@@ -12,6 +12,6 @@ A block tracking plugin for NukkitX which uses the DbLib plugin. Gives operators
 
 /blockhistory - Shows the history of the blocks, including who altered them, when they did so, and what they altered. You must place or break a block after using the command to input the position to get the history.
   
-# Todo
+## Todo
 
 Allow operators to rollback the changes made in a region or made by a player.

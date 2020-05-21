@@ -6,7 +6,6 @@ import com.nbpe.db.BlockHistory;
 import com.nbpe.db.DBAccess;
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.permission.Permission;
@@ -16,7 +15,7 @@ public class BlockHistoryCommand extends PluginCommand<BlockTrack>
 {
 
 	public BlockHistoryCommand(String name, Plugin owner) {
-		super("BlockHistory", BlockTrack.plugin);
+		super(name, BlockTrack.plugin);
         this.setPermission(Permission.DEFAULT_OP);
         this.commandParameters.clear();
         this.setUsage("/blockHistory");

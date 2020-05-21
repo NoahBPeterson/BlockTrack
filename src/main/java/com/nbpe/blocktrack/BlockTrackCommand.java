@@ -19,7 +19,7 @@ public class BlockTrackCommand extends PluginCommand<BlockTrack>
 {
 
 	public BlockTrackCommand(String name, Plugin owner) {
-		super("BlockTrack", BlockTrack.plugin);
+		super(name, BlockTrack.plugin);
         this.setPermission(Permission.DEFAULT_OP);
         this.commandParameters.clear();
         this.commandParameters.put("blockTrack", new CommandParameter[]

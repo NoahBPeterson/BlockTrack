@@ -13,10 +13,10 @@ import cn.nukkit.event.block.BlockBreakEvent;
 
 public class BreakListener implements Listener {
 	
-	DBAccess dbAccess;
+	private DBAccess dbAccess;
 	
     @EventHandler(priority = EventPriority.HIGH)
-	public void BreakHandler(BlockBreakEvent e)
+	public void breakHandler(BlockBreakEvent e)
 	{
 		UUID player = e.getPlayer().getUniqueId();
 		dbAccess = DBAccess.getDB();
@@ -26,7 +26,7 @@ public class BreakListener implements Listener {
 			e.setCancelled();
 			return;
 		} else {
-			DBAccess.BHaddEntry(player, e.getBlock(), false); //BlockHistory Tracker
+			DBAccess.blockHistoryAddEntry(player, e.getBlock(), false); //BlockHistory Tracker
 		}
 		
 		int blockType = e.getBlock().getId();
@@ -40,14 +40,14 @@ public class BreakListener implements Listener {
 			broken += entry.getDestroyed(); //Get number of {blockType} broken by player, increment
 		}else
 		{
-			DBAccess.BTaddEntry(player, blockType);
+			DBAccess.blockTrackAddEntry(player, blockType);
 			entry = DBAccess.getByUUIDandBlockType(player, blockType);
 			entry.setDestroyed(broken);
-			dbAccess.BTupdateEntry(entry);
+			dbAccess.blockTrackUpdateEntry(entry);
 			return;
 		}
 		entry.setDestroyed(broken); //Set number of {blockType} broken by player
-		dbAccess.BTupdateEntry(entry);
+		dbAccess.blockTrackUpdateEntry(entry);
 	}
 
 }
