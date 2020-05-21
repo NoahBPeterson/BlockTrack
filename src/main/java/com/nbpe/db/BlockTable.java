@@ -7,12 +7,11 @@ import com.j256.ormlite.table.DatabaseTable;
 public class BlockTable
 {
 	
-	@DatabaseField(canBeNull = false, columnName = "uuidBlockType", id=true)
-	String uuidBlockType;
+    @DatabaseField(canBeNull = false, foreign = true, columnName = "ID_PLAYER", foreignAutoRefresh = true)
+	BlockPlayer bPlayer;
 	
-	@DatabaseField(canBeNull = false, columnName = "uuid")
-	String uuid;
-	
+    //https://ormlite.com/javadoc/ormlite-core/doc-files/ormlite_2.html#index-byte-array
+    //Short?
 	@DatabaseField(canBeNull = false, columnName = "blockType")
 	int blockType;
 	
@@ -22,24 +21,21 @@ public class BlockTable
 	@DatabaseField(canBeNull = true, columnName = "destroyed")
 	int destroyed;
 	
-	public BlockTable(String uuID, int blockType)
+    @DatabaseField(generatedId = true)
+	int genID;
+	
+	public BlockTable(BlockPlayer blockPlayer, int blockType)
 	{
-		uuidBlockType=uuID+blockType;
-		this.uuid=uuID;
+		this.bPlayer = blockPlayer;
 		this.blockType=blockType;
 	}
 	
 	public BlockTable() {}
 	
-	public String getuuidBlockType()
-	{
-		return this.uuidBlockType;
-	}
 	
-	
-	public String getUUID()
+	public BlockPlayer getPlayer()
 	{
-		return this.uuid;
+		return bPlayer;
 	}
 	
 	public int getBlockType()
@@ -47,9 +43,9 @@ public class BlockTable
 		return blockType;
 	}
 	
-	public void setUUID(String uuID)
+	public void setPlayer(BlockPlayer blockPlayer)
 	{
-		this.uuid = uuID;
+		this.bPlayer = blockPlayer;
 	}
 	
 	public void setBlockType(int BlockType)

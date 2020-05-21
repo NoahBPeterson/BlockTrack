@@ -22,6 +22,8 @@ public class DBAccess
 	private static Dao<BlockTable, BlockTable> entriesDao;
 	private static Dao<BlockPosition, BlockPosition> blockPosDao;
 	private static Dao<BlockHistory, BlockHistory> blockHisDao;
+	private static Dao<BlockPlayer, BlockPlayer> blockPlayDao;
+	private static Dao<BlockWorld, BlockWorld> blockWorldDao;
 	private static ConnectionSource connectionSource;
 	private static DBAccess dbAccess;
 	
@@ -56,10 +58,14 @@ public class DBAccess
     		entriesDao =  DaoManager.createDao(connectionSource, BlockTable.class);
     		blockPosDao = DaoManager.createDao(connectionSource, BlockPosition.class);
     		blockHisDao = DaoManager.createDao(connectionSource, BlockHistory.class);
+    		blockPlayDao = DaoManager.createDao(connectionSource, BlockPlayer.class);
+    		blockWorldDao = DaoManager.createDao(connectionSource, BlockWorld.class);
     		//if(!entriesDao.isTableExists())
 	    	TableUtils.createTableIfNotExists(connectionSource, BlockTable.class);
 	    	TableUtils.createTableIfNotExists(connectionSource, BlockPosition.class);
 	    	TableUtils.createTableIfNotExists(connectionSource, BlockHistory.class);
+	    	TableUtils.createTableIfNotExists(connectionSource, BlockPlayer.class);
+	    	TableUtils.createTableIfNotExists(connectionSource, BlockWorld.class);
     	} catch (Exception e) {
     		e.printStackTrace();
     		return false;
@@ -67,27 +73,110 @@ public class DBAccess
     	return true;
 	}
     
+    public static BlockPlayer BPgetPlayer(UUID player)
+    {
+    	BlockPlayer record = null;
+		try
+		{
+			QueryBuilder<BlockPlayer, BlockPlayer> queryBuilder = blockPlayDao.queryBuilder();
+			queryBuilder.where().eq("uuid", player.toString());
+			
+			PreparedQuery<BlockPlayer> preparedQuery = queryBuilder.prepare();
+			record = blockPlayDao.queryForFirst(preparedQuery);
+		} catch (SQLException e) {
+            e.printStackTrace();
+            return record;
+        }
+        return record;
+    }
+    
+    public static BlockWorld BWgetWorld(String levelName)
+    {
+    	BlockWorld record = null;
+		try
+		{
+			QueryBuilder<BlockWorld, BlockWorld> queryBuilder = blockWorldDao.queryBuilder();
+			queryBuilder.where().eq("world", levelName);
+			
+			PreparedQuery<BlockWorld> preparedQuery = queryBuilder.prepare();
+			record = blockWorldDao.queryForFirst(preparedQuery);
+		} catch (SQLException e) {
+            e.printStackTrace();
+            return record;
+        }
+        return record;
+    }
+    
+    public static void BPlayerAddEntry(UUID player)
+    {
+    	BlockPlayer record = new BlockPlayer();
+    	if(BPgetPlayer(player)==null && player != null)
+    	{
+    		try {
+    			record.setuuid(player.toString());
+				blockPlayDao.create(record);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+    	}else if(player == null){
+    		Server.getInstance().getLogger().alert("Tried to insert null UUID!");
+    	}
+    }
+    
+    public static void BWaddEntry(String levelName)
+    {
+    	BlockWorld record = new BlockWorld();
+    	if(BWgetWorld(levelName)==null)
+    	{
+    		record.setWorld(levelName);
+    		try {
+				blockWorldDao.create(record);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+    	}
+    }
+    
+    public static void BlockPositionAddEntry(Block block)
+    {
+    	BlockPosition record = new BlockPosition();
+    	if(getByBlock(block)==null)
+    	{
+    		record.setWorld(BWgetWorld(block.level.getName()));
+    		record.setX(block.getFloorX());
+    		record.setY(block.getFloorY());
+    		record.setZ(block.getFloorZ());
+    		if(record.getWorld() == null) //Create BlockWorld record if it doesn't exist
+    		{
+    			BWaddEntry(block.level.getName());
+        		record.setWorld(BWgetWorld(block.level.getName()));
+    		}
+			try {
+				blockPosDao.create(record);
+			} catch (SQLException e) {
+				BlockTrack.plugin.getLogger().info("Failed to save record! "+e.getSQLState());
+			}
+    	}
+    }
+    
 	public static void BHaddEntry(UUID player, Block block, boolean placed)
 	{
 		
 		BlockHistory record = new BlockHistory();
-		record.setBlockPosition(DBAccess.getByBlock(block));
+		record.setBlockPosition(getByBlock(block));
 		record.setBlockType(block.getId());
 		record.setPlaced(placed);
-		record.setUUID(player.toString());
+		record.setPlayer(BPgetPlayer(player));
 		if(record.getBlockPosition() == null) //Create BlockPosition record if it doesn't exist
 		{
-			BlockPosition bpEntry = new BlockPosition();
-			bpEntry.setWorld(block.level.getName());
-			bpEntry.setX(block.getFloorX());
-			bpEntry.setY(block.getFloorY());
-			bpEntry.setZ(block.getFloorZ());
-			try {
-				blockPosDao.create(bpEntry);
-				record.setBlockPosition(bpEntry); //Now set record's foreign key to the new BlockPosition entry
-			} catch (SQLException e) {
-				BlockTrack.plugin.getLogger().info("Failed to save record! "+e.getSQLState());
-			}
+			BlockPositionAddEntry(block);
+			record.setBlockPosition(getByBlock(block));
+		}
+		
+		if(record.getPlayer() == null) //Create BlockPlayer record if it doesn't exist
+		{
+			BPlayerAddEntry(player);
+			record.setPlayer(BPgetPlayer(player));
 		}
 		
 		try
@@ -102,7 +191,13 @@ public class DBAccess
     
 	public static void BTaddEntry(UUID player, int blockType)
 	{
-		BlockTable record = new BlockTable(player.toString(), blockType);
+		BlockPlayer bPlayer = DBAccess.BPgetPlayer(player);
+		if(bPlayer == null)
+		{
+			BPlayerAddEntry(player);
+			bPlayer = DBAccess.BPgetPlayer(player);
+		}
+		BlockTable record = new BlockTable(bPlayer, blockType);
 		try
 		{
 			entriesDao.create(record);
@@ -116,7 +211,7 @@ public class DBAccess
 	public void BTupdateEntry(BlockTable entryUpdate)
 	{
 		try {
-			if(entryUpdate.getUUID() == null || entryUpdate.getBlockType() == 0)
+			if(entryUpdate.getPlayer() == null || entryUpdate.getBlockType() == 0)
 			{
 				Server.getInstance().getLogger().alert("Error: Tried to update BlockTable with either no UUID or BlockType!");
 			}
@@ -134,7 +229,7 @@ public class DBAccess
 		{
 			for(int i = 0; i < numDestroyed.size(); i++)
 			{
-				blocksDestroyed+= numDestroyed.get(0).getDestroyed();
+				blocksDestroyed+= numDestroyed.get(i).getDestroyed();
 			}
 		}
         return blocksDestroyed;
@@ -148,7 +243,7 @@ public class DBAccess
 		{
 			for(int i = 0; i < numPlaced.size(); i++)
 			{
-				blocksPlaced+= numPlaced.get(0).getPlaced();
+				blocksPlaced+= numPlaced.get(i).getPlaced();
 			}
 		}
         return blocksPlaced;
@@ -157,10 +252,15 @@ public class DBAccess
 	public static BlockPosition getByBlock(Block block)
 	{
 		BlockPosition record = null;
+		BlockWorld worldRecord = DBAccess.BWgetWorld(block.level.getName());
+		if(worldRecord == null)
+		{
+			return record;
+		}
 		try
 		{
 			QueryBuilder<BlockPosition, BlockPosition> queryBuilder = blockPosDao.queryBuilder();
-			queryBuilder.where().eq("x", block.getFloorX()).and().eq("y", block.getFloorY()).and().eq("z", block.getFloorZ()).and().eq("world", block.level.getName());
+			queryBuilder.where().eq("x", block.getFloorX()).and().eq("y", block.getFloorY()).and().eq("z", block.getFloorZ()).and().eq("ID_WORLD", worldRecord);
 			
 			PreparedQuery<BlockPosition> preparedQuery = queryBuilder.prepare();
 			record = blockPosDao.queryForFirst(preparedQuery);
@@ -174,10 +274,21 @@ public class DBAccess
 	public static BlockTable getByUUIDandBlockType(UUID player, int BlockType)
 	{
 		BlockTable record = null;
+		BlockPlayer recordPlayer = DBAccess.BPgetPlayer(player);
+		if(recordPlayer == null)
+		{
+			DBAccess.BPlayerAddEntry(player);
+			recordPlayer = DBAccess.BPgetPlayer(player);
+    		try {
+				blockPlayDao.refresh(recordPlayer);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} //Without this, BlockPlayer only has the ID but not the UUID.
+		}
 		try
 		{
 			QueryBuilder<BlockTable, BlockTable> queryBuilder = entriesDao.queryBuilder();
-			queryBuilder.where().eq("uuid", player.toString()).and().eq("blockType", BlockType);
+			queryBuilder.where().eq("ID_PLAYER", recordPlayer.genID).and().eq("blockType", BlockType).query();
 			
 			PreparedQuery<BlockTable> preparedQuery = queryBuilder.prepare();
 			record = entriesDao.queryForFirst(preparedQuery);
@@ -192,10 +303,15 @@ public class DBAccess
     public static List<BlockTable> getByUUID(UUID player)
     {
         List<BlockTable> records = null;
+		BlockPlayer recordPlayer = DBAccess.BPgetPlayer(player);
+		if(recordPlayer == null)
+		{
+			return records;
+		}
         try {
         	// "SELECT * from BlockTable WHERE uuid=player.toString() ORDER BY destroyed DESC";
-        	records = entriesDao.queryBuilder().orderBy("destroyed", false).where().eq("uuid", player.toString()).query();
-            //records = entriesDao.queryForEq("uuid", player.toString());
+        	records = entriesDao.queryBuilder().orderByRaw("(destroyed+placed) DESC").where().eq("ID_PLAYER", recordPlayer.genID).query();
+        	//        	records = entriesDao.queryBuilder().orderBy("destroyed", false).where().eq("ID_PLAYER", recordPlayer.genID).query();
         } catch (SQLException e) {
             e.printStackTrace();
             return records;
@@ -213,9 +329,11 @@ public class DBAccess
     	}
         try {
         	// "SELECT * from BlockHistory AND BlockPosition WHERE BlockHistory.BlockPosition = BlockPosition
-        	records = blockHisDao.queryBuilder().orderBy("unixTime", false).where().eq("ID_BLOCK_POSITION", getHistory.genID)
-        			.query();
-            //records = entriesDao.queryForEq("uuid", player.toString());
+        	records = blockHisDao.queryBuilder().orderBy("unixTime", false).where().eq("ID_BLOCK_POSITION", getHistory.genID).query();
+        	for(int i = 0; i < records.size(); i++)
+    		{
+        		blockPlayDao.refresh(records.get(i).getPlayer()); //Without this, BlockPlayer only has the ID but not the UUID.
+    		}
         } catch (SQLException e) {
             e.printStackTrace();
             return records;

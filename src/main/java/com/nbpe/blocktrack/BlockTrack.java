@@ -169,7 +169,7 @@ public class BlockTrack extends PluginBase
     	for(; i < max; i++)
     	{
         	LocalDateTime triggerTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(tableToFormat.get(i-1).getTime()),TimeZone.getDefault().toZoneId());
-        	UUID playerUUID = UUID.fromString(tableToFormat.get(i-1).getUUID());
+        	UUID playerUUID = UUID.fromString(tableToFormat.get(i-1).getPlayer().getuuid());
         	String playerName = Server.getInstance().getPlayer(playerUUID).get().getDisplayName();
         	formatted[i]=TextFormat.GOLD+triggerTime.toString().replace("T", " ")+"--"+TextFormat.BLUE+playerName;
         	if(tableToFormat.get(i-1).placed())

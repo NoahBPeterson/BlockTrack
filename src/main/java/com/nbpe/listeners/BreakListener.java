@@ -15,7 +15,7 @@ public class BreakListener implements Listener {
 	
 	DBAccess dbAccess;
 	
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGH)
 	public void BreakHandler(BlockBreakEvent e)
 	{
 		UUID player = e.getPlayer().getUniqueId();
@@ -24,6 +24,7 @@ public class BreakListener implements Listener {
 		{
 			BlockTrack.bhc.blockHistorySend(e.getPlayer(), e.getBlock());
 			e.setCancelled();
+			return;
 		} else {
 			DBAccess.BHaddEntry(player, e.getBlock(), false); //BlockHistory Tracker
 		}
@@ -39,9 +40,10 @@ public class BreakListener implements Listener {
 			broken += entry.getDestroyed(); //Get number of {blockType} broken by player, increment
 		}else
 		{
-			entry = new BlockTable(player.toString(), blockType);
-			entry.setDestroyed(broken);
 			DBAccess.BTaddEntry(player, blockType);
+			entry = DBAccess.getByUUIDandBlockType(player, blockType);
+			entry.setDestroyed(broken);
+			dbAccess.BTupdateEntry(entry);
 			return;
 		}
 		entry.setDestroyed(broken); //Set number of {blockType} broken by player

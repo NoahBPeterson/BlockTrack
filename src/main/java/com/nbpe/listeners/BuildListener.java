@@ -15,7 +15,7 @@ public class BuildListener implements Listener {
 	
 	DBAccess dbAccess;
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGH)
 	public void BuildHandler(BlockPlaceEvent e)
 	{
 		UUID player = e.getPlayer().getUniqueId();
@@ -24,6 +24,7 @@ public class BuildListener implements Listener {
 		{			
 			BlockTrack.bhc.blockHistorySend(e.getPlayer(), e.getBlock());
 			e.setCancelled();
+			return;
 		} else {
 			DBAccess.BHaddEntry(player, e.getBlock(), true); //BlockHistory Tracker
 		}
@@ -39,9 +40,10 @@ public class BuildListener implements Listener {
 			placed += entry.getPlaced(); //Get number of {blockType} placed by player, increment
 		}else
 		{
-			entry = new BlockTable(player.toString(), blockType);
-			entry.setPlaced(placed);
 			DBAccess.BTaddEntry(player, blockType);
+			entry = DBAccess.getByUUIDandBlockType(player, blockType);
+			entry.setPlaced(placed);
+			dbAccess.BTupdateEntry(entry);
 			return;
 		}
 		entry.setPlaced(placed); //Set number of {blockType} placed by player

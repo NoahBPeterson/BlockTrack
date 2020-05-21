@@ -9,8 +9,8 @@ public class BlockHistory {
     @DatabaseField(canBeNull = false, foreign = true, columnName = "ID_BLOCK_POSITION")
 	BlockPosition blockPos;
 	
-    @DatabaseField(canBeNull = false, columnName = "uuid")
-	String uuid;
+    @DatabaseField(canBeNull = false, foreign = true, columnName = "ID_PLAYER", foreignAutoRefresh=true)
+	BlockPlayer bPlayer;
 	
     @DatabaseField(canBeNull = false, columnName = "unixTime")
 	int unixTime;
@@ -21,20 +21,20 @@ public class BlockHistory {
     @DatabaseField(canBeNull = false, columnName = "blockType")
 	int blockType;
 	
-    BlockHistory(BlockPosition blockPosition, String UUID, boolean placed, int BlockType)
+    BlockHistory(BlockPosition blockPosition, BlockPlayer blockPlayer, boolean placed, int BlockType)
     {
     	blockPos = blockPosition;
-    	uuid=UUID;
-    	placed=true;
+    	bPlayer=blockPlayer;
+    	setPlaced(placed);
     	blockType=BlockType;
 		unixTime = (int) (System.currentTimeMillis() / 1000L);
 
     }
     
-    BlockHistory(BlockPosition blockPosition, String UUID)
+    BlockHistory(BlockPosition blockPosition, BlockPlayer player)
     {
     	blockPos = blockPosition;
-    	uuid=UUID;
+    	bPlayer=player;
     	placed=false;
 		unixTime = (int) (System.currentTimeMillis() / 1000L);
     }
@@ -59,14 +59,14 @@ public class BlockHistory {
 		blockPos = d;
 	}
 	
-	public String getUUID()
+	public BlockPlayer getPlayer()
 	{
-		return uuid;
+		return bPlayer;
 	}
 	
-	public void setUUID(String c)
+	public void setPlayer(BlockPlayer c)
 	{
-		uuid = c;
+		bPlayer = c;
 	}
 	
 	public boolean placed()

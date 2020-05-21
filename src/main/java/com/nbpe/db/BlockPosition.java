@@ -6,8 +6,8 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "BlockPosition")
 public class BlockPosition {
 	
-    @DatabaseField(canBeNull = false, columnName = "world")
-	String world;
+    @DatabaseField(canBeNull = false, foreign = true, columnName = "ID_WORLD", foreignAutoRefresh=true)
+    BlockWorld bWorld;
     
     @DatabaseField(canBeNull = false, columnName = "x")
 	int x;
@@ -26,14 +26,14 @@ public class BlockPosition {
 		x=c;
 	}
 	
-	public String getWorld()
+	public BlockWorld getWorld()
 	{
-		return world;
+		return bWorld;
 	}
 	
-	public void setWorld(String d)
+	public void setWorld(BlockWorld d)
 	{
-		world=d;
+		bWorld = d;
 	}
 	
 	public int getX()
