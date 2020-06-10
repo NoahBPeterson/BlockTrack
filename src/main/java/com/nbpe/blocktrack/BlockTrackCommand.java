@@ -12,7 +12,6 @@ import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.item.Item;
-import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.Plugin;
 
 public class BlockTrackCommand extends PluginCommand<BlockTrack>
@@ -20,7 +19,7 @@ public class BlockTrackCommand extends PluginCommand<BlockTrack>
 
 	public BlockTrackCommand(String name, Plugin owner) {
 		super(name, BlockTrack.plugin);
-        this.setPermission(Permission.DEFAULT_OP);
+		this.setPermission("blocktrack.track");
         this.commandParameters.clear();
         this.commandParameters.put("blockTrack", new CommandParameter[]
         		{

@@ -8,7 +8,6 @@ import com.nbpe.db.DBAccess;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.command.PluginCommand;
-import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.Plugin;
 
 public class BlockHistoryCommand extends PluginCommand<BlockTrack>
@@ -16,7 +15,7 @@ public class BlockHistoryCommand extends PluginCommand<BlockTrack>
 
 	public BlockHistoryCommand(String name, Plugin owner) {
 		super(name, BlockTrack.plugin);
-        this.setPermission(Permission.DEFAULT_OP);
+		this.setPermission("blocktrack.history");
         this.commandParameters.clear();
         this.setUsage("/blockHistory");
         this.setDescription("Break or place a block to get a history of block change at that position.");

@@ -75,7 +75,8 @@ public class BlockTrack extends PluginBase
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) 
     {
-        if (!sender.isOp() && !(sender instanceof ConsoleCommandSender))
+        if ((!sender.isOp() && !(sender instanceof ConsoleCommandSender)) &&
+        		!(sender.hasPermission("blocktrack.track") || sender.hasPermission("blocktrack.history")))
         {
         	sender.sendMessage("You do not have permission to use this command.");
             return false;
@@ -125,7 +126,6 @@ public class BlockTrack extends PluginBase
 	        	sender.sendMessage(TextFormat.AQUA+"Place or destroy a block to get the history at that location.");
         	}
         }
-
 
         return true;
     }
