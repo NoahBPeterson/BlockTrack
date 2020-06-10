@@ -19,7 +19,7 @@ public class BlockHistoryCommand extends PluginCommand<BlockTrack>
         this.setPermission(Permission.DEFAULT_OP);
         this.commandParameters.clear();
         this.setUsage("/blockHistory");
-        this.setDescription("After using the command, break or place a block to get a history of block change at that position.");
+        this.setDescription("Break or place a block to get a history of block change at that position.");
 	}
 	
 	public void blockHistory(Player p)
