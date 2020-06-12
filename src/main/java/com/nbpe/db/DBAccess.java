@@ -167,6 +167,13 @@ public class DBAccess
 		record.setBlockType(block.getId());
 		record.setPlaced(placed);
 		record.setPlayer(getPlayer(player));
+		if(Block.hasMeta[block.getId()])
+		{
+			record.setSubType(block.getFullId() & 0xF); //Get lowest 4 bits of the fullId
+		} else
+		{
+			record.setSubType(0);
+		}
 		if(record.getBlockPosition() == null) //Create BlockPosition record if it doesn't exist
 		{
 			blockPositionAddEntry(block);

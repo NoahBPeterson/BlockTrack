@@ -20,6 +20,9 @@ public class BlockHistory {
 	
     @DatabaseField(canBeNull = false, columnName = "blockType")
 	int blockType;
+    
+    @DatabaseField(canBeNull = true, columnName = "blockSubType")
+    int blockSubType;
 	
     BlockHistory(BlockPosition blockPosition, BlockPlayer blockPlayer, boolean placed, int BlockType)
     {
@@ -47,6 +50,11 @@ public class BlockHistory {
 	public int getTime()
 	{
 		return unixTime;
+	}
+	
+	public int getSubType()
+	{
+		return blockSubType;
 	}
 	
 	public BlockPosition getBlockPosition()
@@ -77,6 +85,11 @@ public class BlockHistory {
 	public void setPlaced(boolean b)
 	{
 		placed = b;
+	}
+	
+	public void setSubType(int n)
+	{
+		blockSubType = n;
 	}
 	
 	public int getBlockType()

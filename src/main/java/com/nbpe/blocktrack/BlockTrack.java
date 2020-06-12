@@ -179,7 +179,7 @@ public class BlockTrack extends PluginBase
         	{
         		formatted[i]+=TextFormat.RED+" broke ";
         	}
-        	formatted[i]+=TextFormat.GRAY+Block.get(tableToFormat.get(i-1).getBlockType()).getName();
+        	formatted[i]+=TextFormat.GRAY+Block.get(tableToFormat.get(i-1).getBlockType(), tableToFormat.get(i-1).getSubType()).getName();
     	}
 
     	
