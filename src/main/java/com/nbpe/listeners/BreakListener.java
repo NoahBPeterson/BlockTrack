@@ -1,10 +1,12 @@
 package com.nbpe.listeners;
 
 import com.nbpe.blocktrack.BlockTrack;
-import com.nbpe.db.BlockTable;
-import com.nbpe.db.DBAccess;
+import com.nbpe.listeners.async.AsyncBlockHistory;
+import com.nbpe.listeners.async.AsyncBlockSend;
+import com.nbpe.listeners.async.AsyncBreak;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockLava;
 import cn.nukkit.block.BlockWater;
@@ -16,9 +18,7 @@ import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.player.PlayerBucketFillEvent;
 
 public class BreakListener implements Listener {
-	
-	private DBAccess dbAccess;
-	
+		
     @EventHandler(priority = EventPriority.HIGH)
 	public void breakHandler(BlockBreakEvent e)
 	{
@@ -53,34 +53,20 @@ public class BreakListener implements Listener {
     	breakHandler(e, e.getPlayer(), takenLiquid);
     }
     
-    void breakHandler(Event event, Player player, Block block)
+    public static void breakHandler(Event event, Player player, Block block)
     {
     	if(block.getId() == 0) return;
 
-		dbAccess = DBAccess.getDB();
 		if(BlockTrack.playersHistoryCheck.contains(player.getUniqueId()))
 		{
-			BlockTrack.bhc.blockHistorySend(player, block);
+	    	Server.getInstance().getScheduler().scheduleAsyncTask(BlockTrack.plugin, new AsyncBlockSend(player, block));
 			event.setCancelled();
 			return;
 		} else {
-			DBAccess.blockHistoryAddEntry(player.getUniqueId(), block, false); //BlockHistory Tracker
+	    	Server.getInstance().getScheduler().scheduleAsyncTask(BlockTrack.plugin, new AsyncBlockHistory(player.getUniqueId(), block, false));
 		}		
-				
-		BlockTable entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId());	//Get DAO from database with the above UUID and blocktype
-		int broken = 1;
-		if(entry != null)
-		{
-			broken += entry.getDestroyed(); //Get number of {blockType} broken by player, increment
-		}else
-		{
-			DBAccess.blockTrackAddEntry(player.getUniqueId(), block.getId());
-			entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId());
-			entry.setDestroyed(broken);
-			dbAccess.blockTrackUpdateEntry(entry);
-			return;
-		}
-		entry.setDestroyed(broken); //Set number of {blockType} broken by player
-		dbAccess.blockTrackUpdateEntry(entry);
+		
+    	Server.getInstance().getScheduler().scheduleAsyncTask(BlockTrack.plugin, new AsyncBreak(event, player, block));
+
     }
 }

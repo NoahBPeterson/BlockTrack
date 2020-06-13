@@ -1,10 +1,13 @@
 package com.nbpe.listeners;
 
 import com.nbpe.blocktrack.BlockTrack;
-import com.nbpe.db.BlockTable;
-import com.nbpe.db.DBAccess;
+import com.nbpe.listeners.async.AsyncBlockHistory;
+import com.nbpe.listeners.async.AsyncBlockSend;
+import com.nbpe.listeners.async.AsyncBreak;
+import com.nbpe.listeners.async.AsyncBuild;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockLava;
 import cn.nukkit.block.BlockWater;
@@ -17,8 +20,6 @@ import cn.nukkit.event.player.PlayerBucketEmptyEvent;
 
 public class BuildListener implements Listener {
 	
-	private DBAccess dbAccess;
-
     @EventHandler(priority = EventPriority.HIGH)
 	public void buildHandler(BlockPlaceEvent e)
 	{
@@ -49,34 +50,20 @@ public class BuildListener implements Listener {
     	buildHandler(e, e.getPlayer(), placedLiquid);
     }
     
-    void buildHandler(Event event, Player player, Block block)
+    public static void buildHandler(Event event, Player player, Block block)
     {
     	if(block.getId() == 0) return;
     	
-		dbAccess = DBAccess.getDB();
 		if(BlockTrack.playersHistoryCheck.contains(player.getUniqueId()))
 		{			
-			BlockTrack.bhc.blockHistorySend(player, block);
+	    	Server.getInstance().getScheduler().scheduleAsyncTask(BlockTrack.plugin, new AsyncBlockSend(player, block));
 			event.setCancelled();
 			return;
 		} else {
-			DBAccess.blockHistoryAddEntry(player.getUniqueId(), block, true); //BlockHistory Tracker
+	    	Server.getInstance().getScheduler().scheduleAsyncTask(BlockTrack.plugin, new AsyncBlockHistory(player.getUniqueId(), block, true));
 		}
 	
-		BlockTable entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId());	//Get DAO from database with the above UUID and blocktype
-		int placed = 1;
-		if(entry != null)
-		{
-			placed += entry.getPlaced(); //Get number of {blockType} placed by player, increment
-		}else
-		{
-			DBAccess.blockTrackAddEntry(player.getUniqueId(), block.getId());
-			entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId());
-			entry.setPlaced(placed);
-			dbAccess.blockTrackUpdateEntry(entry);
-			return;
-		}
-		entry.setPlaced(placed); //Set number of {blockType} placed by player
-		dbAccess.blockTrackUpdateEntry(entry);
+    	Server.getInstance().getScheduler().scheduleAsyncTask(BlockTrack.plugin, new AsyncBuild(event, player, block));
+
     }
 }

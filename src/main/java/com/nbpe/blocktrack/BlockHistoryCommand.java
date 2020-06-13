@@ -30,9 +30,8 @@ public class BlockHistoryCommand extends PluginCommand<BlockTrack>
     	}
 	}
 	
-	public boolean blockHistorySend(Player p, Block block)
+	public static boolean blockHistorySend(Player p, Block block)
 	{
-		//Boolean blockPos = BlockTrack.playersHistoryCheck.get(p.getUniqueId());
 		List<BlockHistory> blockHistory = DBAccess.getListByBlock(block);
 		if(blockHistory != null && blockHistory.size() > 0)
 		{
