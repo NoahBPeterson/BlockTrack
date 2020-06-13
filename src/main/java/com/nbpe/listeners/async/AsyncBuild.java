@@ -25,15 +25,15 @@ public class AsyncBuild extends AsyncTask {
 	public void onRun() {
 		DBAccess dbAccess = DBAccess.getDB();
 
-		BlockTable entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId());	//Get DAO from database with the above UUID and blocktype
+		BlockTable entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId(), block.getFullId() & 0xF);	//Get DAO from database with the above UUID and blocktype
 		int placed = 1;
 		if(entry != null)
 		{
 			placed += entry.getPlaced(); //Get number of {blockType} placed by player, increment
 		}else
 		{
-			DBAccess.blockTrackAddEntry(player.getUniqueId(), block.getId());
-			entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId());
+			DBAccess.blockTrackAddEntry(player.getUniqueId(), block);
+			entry = DBAccess.getByUUIDandBlockType(player.getUniqueId(), block.getId(), block.getFullId() & 0xF);
 			entry.setPlaced(placed);
 			dbAccess.blockTrackUpdateEntry(entry);
 			return;

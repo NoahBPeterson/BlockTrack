@@ -54,7 +54,7 @@ public class BlockTrackCommand extends PluginCommand<BlockTrack>
 	
 	public boolean playerBlockType(CommandSender sender, Player p, int pageNumber, Item blockType)
 	{
-		BlockTable value = DBAccess.getByUUIDandBlockType(p.getUniqueId(), blockType.getId());
+		BlockTable value = DBAccess.getByUUIDandBlockType(p.getUniqueId(), blockType.getId(), blockType.getBlock().getFullId() & 0xF);
 		if(value == null)
 		{
 			sender.sendMessage("No "+blockType.toString()+" broken by player.");

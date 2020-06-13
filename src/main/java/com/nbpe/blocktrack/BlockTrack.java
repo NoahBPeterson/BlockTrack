@@ -209,7 +209,7 @@ public class BlockTrack extends PluginBase
     	for(; i < max; i++)
     	{
     		BlockTable entry = tableToFormat.get((i-1));
-    		String type = Block.get(entry.getBlockType()).getName();
+    		String type = Block.get(entry.getBlockType(), entry.getSubType()).getName();
     		int destroyedLength = String.valueOf(entry.getDestroyed()).length();
     		int placedLength = String.valueOf(entry.getPlaced()).length();
     		

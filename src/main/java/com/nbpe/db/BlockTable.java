@@ -3,6 +3,8 @@ package com.nbpe.db;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import cn.nukkit.block.Block;
+
 @DatabaseTable(tableName = "BlockTrackStatistics")
 public class BlockTable
 {
@@ -15,6 +17,9 @@ public class BlockTable
 	@DatabaseField(canBeNull = false, columnName = "blockType")
 	int blockType;
 	
+    @DatabaseField(canBeNull = true, columnName = "blockSubType")
+    int blockSubType;
+	
 	@DatabaseField(canBeNull = true, columnName = "placed")
 	int placed;
 	
@@ -24,13 +29,31 @@ public class BlockTable
     @DatabaseField(generatedId = true)
 	int genID;
 	
-	public BlockTable(BlockPlayer blockPlayer, int blockType)
+	public BlockTable(BlockPlayer blockPlayer, Block block)
 	{
 		this.bPlayer = blockPlayer;
-		this.blockType=blockType;
+		this.blockType=block.getId();
+		if(Block.hasMeta[block.getId()])
+		{
+			this.setSubType(block.getFullId() & 0xF); //Get lowest 4 bits of the fullId
+		} else
+		{
+			this.setSubType(0);
+		}
+
 	}
 	
 	public BlockTable() {}
+	
+	public int getSubType()
+	{
+		return blockSubType;
+	}
+	
+	public void setSubType(int n)
+	{
+		blockSubType = n;
+	}
 	
 	
 	public BlockPlayer getPlayer()

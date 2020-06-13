@@ -196,7 +196,7 @@ public class DBAccess
 		}
 	}
     
-	public static void blockTrackAddEntry(UUID player, int blockType)
+	public static void blockTrackAddEntry(UUID player, Block block)
 	{
 		BlockPlayer bPlayer = DBAccess.getPlayer(player);
 		if(bPlayer == null)
@@ -204,7 +204,7 @@ public class DBAccess
 			playerAddEntry(player);
 			bPlayer = DBAccess.getPlayer(player);
 		}
-		BlockTable record = new BlockTable(bPlayer, blockType);
+		BlockTable record = new BlockTable(bPlayer, block);
 		try
 		{
 			entriesDao.create(record);
@@ -278,7 +278,7 @@ public class DBAccess
         return record;
 	}
 	
-	public static BlockTable getByUUIDandBlockType(UUID player, int BlockType)
+	public static BlockTable getByUUIDandBlockType(UUID player, int BlockType, int subType)
 	{
 		BlockTable record = null;
 		BlockPlayer recordPlayer = DBAccess.getPlayer(player);
@@ -295,7 +295,7 @@ public class DBAccess
 		try
 		{
 			QueryBuilder<BlockTable, BlockTable> queryBuilder = entriesDao.queryBuilder();
-			queryBuilder.where().eq("ID_PLAYER", recordPlayer.genID).and().eq("blockType", BlockType).query();
+			queryBuilder.where().eq("ID_PLAYER", recordPlayer.genID).and().eq("blockType", BlockType).and().eq("blockSubType", subType).query();
 			
 			PreparedQuery<BlockTable> preparedQuery = queryBuilder.prepare();
 			record = entriesDao.queryForFirst(preparedQuery);
