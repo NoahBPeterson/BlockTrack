@@ -193,6 +193,12 @@ public class DBAccess
 		} catch (SQLException e)
 		{
 			BlockTrack.plugin.getLogger().info("Failed to save record! "+e.getSQLState());
+			
+			try {
+				entriesDao.executeRaw("ALTER TABLE `BlockHistory` ADD COLUMN blockSubType INT;");
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
     
@@ -299,9 +305,14 @@ public class DBAccess
 			
 			PreparedQuery<BlockTable> preparedQuery = queryBuilder.prepare();
 			record = entriesDao.queryForFirst(preparedQuery);
-
+			
 		} catch (SQLException e) {
             e.printStackTrace();
+			try {
+				entriesDao.executeRaw("ALTER TABLE `BlockTrackStatistics` ADD COLUMN blockSubType INT;");
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
             return record;
         }
         return record;
