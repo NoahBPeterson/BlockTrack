@@ -1,7 +1,7 @@
 name: BlockTrack
 main: com.nbpe.blocktrack.BlockTrack
 author: nbpe
-version: 1.0.3
+version: 1.0.4
 api: ["1.0.0"]
 depend: [DbLib]
 description: BlockTrack for NukkitX
