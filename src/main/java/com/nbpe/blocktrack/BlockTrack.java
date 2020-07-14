@@ -76,7 +76,7 @@ public class BlockTrack extends PluginBase
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) 
     {
         if ((!sender.isOp() && !(sender instanceof ConsoleCommandSender)) &&
-        		!(sender.hasPermission("blocktrack.track") || sender.hasPermission("blocktrack.history")))
+        		!(sender.hasPermission("blocktrack.track") || sender.hasPermission("blocktrack.history") || sender.hasPermission("blocktrack.rollback")))
         {
         	sender.sendMessage("You do not have permission to use this command.");
             return false;
@@ -99,7 +99,7 @@ public class BlockTrack extends PluginBase
         	pageNumber = 0;
         }
 
-        if(blockTrack)
+        if(blockTrack && sender.hasPermission("blocktrack.track"))
         {
 
 	        switch(args.length)
@@ -117,7 +117,7 @@ public class BlockTrack extends PluginBase
 		        	sender.sendMessage(getUsage());
 		        	return false;
 	        }
-        }else if(cmd.getName().equalsIgnoreCase("blockhistory"))
+        }else if(cmd.getName().equalsIgnoreCase("blockhistory") && sender.hasPermission("blocktrack.history"))
         {
         	Player bHPlayer;
         	if(sender instanceof Player) {
@@ -125,6 +125,9 @@ public class BlockTrack extends PluginBase
             	bhc.blockHistory(bHPlayer);
 	        	sender.sendMessage(TextFormat.AQUA+"Place or destroy a block to get the history at that location.");
         	}
+        }else if(cmd.getName().equalsIgnoreCase("blockrollback") && sender.hasPermission("blocktrack.rollback"))
+        {
+        	
         }
 
         return true;
